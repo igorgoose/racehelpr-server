@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: racehelpr-server
+
+  threads:
+    virtual:
+      enabled: true
