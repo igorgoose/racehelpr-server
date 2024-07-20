@@ -2,8 +2,10 @@ package com.igorgoose.racehelpr.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.igorgoose.racehelpr.model.request.RaceEventsRequest;
-import com.igorgoose.racehelpr.session.RaceSessionConfig;
+import com.igorgoose.racehelpr.domain.model.request.RaceEventsRequest;
+import com.igorgoose.racehelpr.persistence.RaceRepository;
+import com.igorgoose.racehelpr.watcher.RaceWatcherManager;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -16,28 +18,27 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RequiredArgsConstructor
 @Component
 public class RaceWebSocketHandler extends TextWebSocketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RaceWebSocketHandler.class);
 
+    private final RaceRepository raceRepository;
+    private final RaceWatcherManager raceWatcherManager;
     private final ObjectMapper objectMapper;
     private final Map<WebSocketSession, Boolean> sessions = new ConcurrentHashMap<>();
 
-    public RaceWebSocketHandler(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Override
-    public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) {
         sessions.put(session, true);
-        logger.debug(STR."Added session \{session}");
+        logger.debug("Added session {}", session);
     }
 
     @Override
-    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
-        logger.debug(STR."Session \{session} closed with status \{status}");
-        sessions.remove(session, true);
-        logger.debug(STR."Removed session \{session}");
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
+        logger.debug("Session {} closed with status {}", session,status );
+        sessions.remove(session);
+        logger.debug("Removed session {}", session);
     }
 
     @Override
@@ -47,9 +48,12 @@ public class RaceWebSocketHandler extends TextWebSocketHandler {
         try {
             request = objectMapper.readValue(payload, RaceEventsRequest.class);
         } catch (JsonProcessingException e) {
-            logger.debug(STR."Could not parse request \{payload}, skipping it");
+            logger.debug("Could not parse request {}, skipping it", payload);
             return;
         }
-        session.getAttributes().put("config", new RaceSessionConfig(request.mode(), request.trackId()));
+        raceRepository.findById(request.raceId()).ifPresentOrElse(
+                race -> raceWatcherManager.attachSessionToRace(session, race),
+                () -> logger.info("Could not attach to race watcher: invalid race id {}", request.raceId())
+        );
     }
 }

@@ -1,12 +1,12 @@
 package com.igorgoose.racehelpr.session;
 
-import com.igorgoose.racehelpr.model.RaceMode;
+import com.igorgoose.racehelpr.domain.model.RaceMode;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 public class RaceSessionConfig {
-    private static VarHandle REQUIRES_SNAPSHOT_HANDLE;
+    private static final VarHandle REQUIRES_SNAPSHOT_HANDLE;
 
     static {
         try {

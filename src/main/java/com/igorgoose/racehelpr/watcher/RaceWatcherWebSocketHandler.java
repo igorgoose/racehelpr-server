@@ -6,6 +6,7 @@ import org.springframework.web.socket.*;
 
 import java.io.IOException;
 
+
 class RaceWatcherWebSocketHandler implements WebSocketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RaceWatcherWebSocketHandler.class);
     private final RaceWatcher raceWatcher;
@@ -24,9 +25,9 @@ class RaceWatcherWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
         switch (message) {
-            case BinaryMessage _ -> logger.debug("Got a binary message, skipping it");
+            case BinaryMessage a -> logger.debug("Got a binary message, skipping it");
             case TextMessage textMessage -> raceWatcher.processMessage(textMessage.getPayload());
-            default -> throw new IllegalStateException(STR."Unexpected value: \{message}");
+            default -> throw new IllegalStateException("Unexpected value: %s".formatted(message));
         }
     }
 

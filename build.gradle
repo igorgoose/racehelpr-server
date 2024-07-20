@@ -1,3 +1,5 @@
+import com.igorgoose.racehelpr.gradle.GenerateModificationCatcher
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.5'
@@ -8,7 +10,7 @@ group = 'com.igorgoose'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '22'
+    sourceCompatibility = '21'
 }
 
 repositories {
@@ -21,8 +23,25 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    compileOnly(fileTree("${project.rootDir}/buildSrc/build/"))
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+//tasks.register('generateUpdateCapturingProxy', GenerateModificationCatcher) {
+//    inputCompileClassPath = compileJava.outputs.getFiles()
+//    targetPackage = "com.igorgoose.racehelpr.watcher.stats.data"
+//}
+//
+//tasks.named('generateUpdateCapturingProxy') {
+//    dependsOn(compileJava)
+//}
+//
+//tasks.bootJar {
+//    dependsOn('generateUpdateCapturingProxy')
+//}

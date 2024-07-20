@@ -1,0 +1,15 @@
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "net.bytebuddy:byte-buddy:1.14.17"
+
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+}
+
+java {
+    sourceCompatibility = '21'
+}
